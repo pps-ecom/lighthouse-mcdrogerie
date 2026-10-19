@@ -17,26 +17,26 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
 
-strategy:
-  fail-fast: false
+    strategy:
+      fail-fast: false
 
-  matrix:
-    include:
-    - name: Home
-      url: https://www.mcdrogerie.ch/
+      matrix:
+        include:
+          - name: Home
+            url: https://www.mcdrogerie.ch/
 
-    - name: Editorial
-      url: https://www.mcdrogerie.ch/e/flohsamen-das-kleine-wundermittel-mit-grosser-wirkung
+          - name: Editorial
+            url: https://www.mcdrogerie.ch/e/flohsamen-das-kleine-wundermittel-mit-grosser-wirkung
 
-    - name: PDP
-      url: https://www.mcdrogerie.ch/a/kijimea-reizdarm-pro-kapsel-84-stuck-1117904
+          - name: PDP
+            url: https://www.mcdrogerie.ch/a/kijimea-reizdarm-pro-kapsel-84-stuck-1117904
 
-    - name: Category
-      url: https://www.mcdrogerie.ch/c/gesundheit-vitalitaet/
+          - name: Category
+            url: https://www.mcdrogerie.ch/c/gesundheit-vitalitaet/
 
-    - name: Brand
-      url: https://www.mcdrogerie.ch/b/la-roche-posay
-      
+          - name: Brand
+            url: https://www.mcdrogerie.ch/b/la-roche-posay
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
