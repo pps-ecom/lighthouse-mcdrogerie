@@ -17,10 +17,11 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-  include:
+strategy:
+  fail-fast: false
+
+  matrix:
+    include:
     - name: Home
       url: https://www.mcdrogerie.ch/
 
