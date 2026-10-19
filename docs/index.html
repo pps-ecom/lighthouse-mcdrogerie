@@ -26,24 +26,65 @@
       margin-bottom: 24px;
     }
 
-    .nav {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-    }
+.info-box {
+  background: #eef6ff;
+  border: 1px solid #cbdff7;
+  border-left: 5px solid #4CAF50;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
 
-    .nav a,
-    .anchor-links a {
-      padding: 6px 14px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      color: #333;
-      text-decoration: none;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    }
+.info-box summary {
+  cursor: pointer;
+  padding: 14px 18px;
+  font-weight: 600;
+  color: #333;
+  list-style: none;
+}
+
+.info-box summary::-webkit-details-marker {
+  display: none;
+}
+
+.info-box summary::before {
+  content: "▶ ";
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.info-box[open] summary::before {
+  content: "▼ ";
+}
+
+.info-content {
+  padding: 0 18px 16px 18px;
+}
+
+.info-content p {
+  margin: 10px 0;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+   flex-wrap: wrap;
+   margin-bottom: 28px;
+}
+
+.nav a,
+.anchor-links a {
+  padding: 6px 14px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #333;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
 
     .nav a:hover,
     .anchor-links a:hover {
@@ -322,11 +363,47 @@
 <body>
   <div id="top"></div>
 
-  <h1>🔦 Lighthouse Dashboard - McDrogerie.ch</h1>
+  <h1>🔦 Lighthouse Dashboard - mcdrogerie.ch</h1>
 
   <p class="subtitle">
-    Übersicht der Lighthouse-Messungen für ausgewählte Seitentypen von McDrogerie.ch.
+    Übersicht der Lighthouse-Messungen für ausgewählte Seitentypen von mcdrogerie.ch.
   </p>
+
+<details class="info-box">
+
+  <summary>
+    ℹ️ Hinweise zur Interpretation der Lighthouse-Werte
+  </summary>
+
+  <div class="info-content">
+
+    <p>
+      Die dargestellten Werte stammen aus automatisierten Lighthouse-Tests,
+      welche über GitHub Actions in einer standardisierten Cloud-Umgebung
+      ausgeführt werden.
+    </p>
+
+    <p>
+      Direkte Lighthouse-Tests im lokalen Chrome Browser können von diesen
+      Ergebnissen abweichen. Ursachen dafür sind unter anderem unterschiedliche
+      Hardware, Netzwerke, Browser-Versionen, Lighthouse-Versionen sowie
+      der Zeitpunkt und Standort der Messung.
+    </p>
+
+    <p>
+      Zur besseren Vergleichbarkeit werden zusätzlich zu den Lighthouse-Scores
+      technische Performance-Kennzahlen wie
+      <strong>TTFB</strong>,
+      <strong>FCP</strong>,
+      <strong>LCP</strong>,
+      <strong>TBT</strong> und
+      <strong>CLS</strong>
+      erfasst und ausgewertet.
+    </p>
+
+  </div>
+
+</details>
 
   <nav class="nav" id="topNav"></nav>
 
@@ -367,22 +444,28 @@
       "PDP",
       "Category",
       "Brand",
+      "Pharmacy"
     ];
 
 const PAGE_URLS = {
   Home: "https://www.mcdrogerie.ch",
   Editorial: "https://www.mcdrogerie.ch/e/flohsamen-das-kleine-wundermittel-mit-grosser-wirkung",
-  PDP: "https://www.mcdrogerie.ch/kijimea-reizdarm-pro-kapsel-84-stuck",
-  Category: "https://www.mcdrogerie.ch/c/gesundheit/",
-  Brand: "https://www.mcdrogerie.ch/b/la-roche-posay"
+  PDP: "https://www.mcdrogerie.ch/a/kijimea-reizdarm-pro-kapsel-84-stuck-1117904",
+  Category: "https://www.mcdrogerie.ch/c/gesundheit-vitalitaet/",
+  Brand: "https://www.mcdrogerie.ch/b/la-roche-posay",
 };
 
-    const COLORS = {
-      performance: "#4CAF50",
-      accessibility: "#2196F3",
-      seo: "#FF9800",
-      best_practices: "#9C27B0"
-    };
+const COLORS = {
+  performance: "#4CAF50",
+  accessibility: "#2196F3",
+  seo: "#FF9800",
+  best_practices: "#9C27B0",
+
+  ttfb: "#F44336",
+  fcp: "#009688",
+  lcp: "#795548",
+  tbt: "#607D8B"
+};
 
     const state = {};
     let allData = [];
@@ -446,6 +529,13 @@ const PAGE_URLS = {
             accessibility: [],
             seo: [],
             best_practices: [],
+
+            fcp: [],
+            lcp: [],
+            tbt: [],
+            cls: [],
+            ttfb: [],
+
             runs: 0
           });
         }
@@ -456,17 +546,31 @@ const PAGE_URLS = {
         group.seo.push(item.seo);
         group.best_practices.push(item.best_practices);
         group.runs += 1;
+        if (item.ttfb != null) group.ttfb.push(item.ttfb);
+        if (item.fcp != null) group.fcp.push(item.fcp);
+        if (item.lcp != null) group.lcp.push(item.lcp);
+        if (item.tbt != null) group.tbt.push(item.tbt);
+        if (item.cls != null) group.cls.push(item.cls);
+
       });
 
-      return Array.from(dailyGroups.entries())
-        .map(([date, values]) => ({
-          date,
-          performance: calculateMedian(values.performance),
-          accessibility: calculateMedian(values.accessibility),
-          seo: calculateMedian(values.seo),
-          best_practices: calculateMedian(values.best_practices),
-          runs: values.runs
-        }))
+    return Array.from(dailyGroups.entries())
+      .map(([date, values]) => ({
+    date,
+
+    performance: calculateMedian(values.performance),
+    accessibility: calculateMedian(values.accessibility),
+    seo: calculateMedian(values.seo),
+    best_practices: calculateMedian(values.best_practices),
+
+    ttfb: calculateMedian(values.ttfb),
+    fcp: calculateMedian(values.fcp),
+    lcp: calculateMedian(values.lcp),
+    tbt: calculateMedian(values.tbt),
+    cls: calculateMedian(values.cls),
+
+    runs: values.runs
+  }))
         .sort((a, b) => a.date.localeCompare(b.date));
     }
 
@@ -555,6 +659,10 @@ card.innerHTML = `
 
   <div class="chart-container">
     <canvas id="chart-${pageId}"></canvas>
+  </div>
+
+  <div class="chart-container" style="margin-top:20px;">
+    <canvas id="tech-chart-${pageId}"></canvas>
   </div>
 
   <div class="chart-url">
@@ -660,6 +768,56 @@ card.innerHTML = `
         });
 
         chartInstances.push(chart);
+        const techCanvas =
+  document.getElementById(`tech-chart-${pageId}`);
+
+const techChart = new Chart(techCanvas, {
+  type: "line",
+
+  data: {
+    labels: medianData.map(item => item.date),
+
+    datasets: [
+      createMedianDataset(
+        "TTFB (ms)",
+        medianData.map(item => item.ttfb),
+        COLORS.ttfb
+      ),
+
+      createMedianDataset(
+        "FCP (ms)",
+        medianData.map(item => item.fcp),
+        COLORS.fcp
+      ),
+
+      createMedianDataset(
+        "LCP (ms)",
+        medianData.map(item => item.lcp),
+        COLORS.lcp
+      ),
+
+      createMedianDataset(
+        "TBT (ms)",
+        medianData.map(item => item.tbt),
+        COLORS.tbt
+      )
+    ]
+  },
+
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    plugins: {
+      title: {
+        display: true,
+        text: "Core Web Vitals & Performance Metrics"
+      }
+    }
+  }
+});
+
+chartInstances.push(techChart);
       });
     }
 
@@ -749,15 +907,24 @@ card.innerHTML = `
           </div>
 
           <table>
-            <thead>
-              <tr>
-                <th data-page="${id}" data-col="date">Datum</th>
-                <th data-page="${id}" data-col="performance">Performance</th>
-                <th data-page="${id}" data-col="accessibility">Accessibility</th>
-                <th data-page="${id}" data-col="seo">SEO</th>
-                <th data-page="${id}" data-col="best_practices">Best Practices</th>
-              </tr>
-            </thead>
+<thead>
+<tr>
+  <th data-page="${id}" data-col="date">Datum</th>
+  <th data-page="${id}" data-col="performance">Performance</th>
+  <th data-page="${id}" data-col="accessibility">Accessibility</th>
+  <th data-page="${id}" data-col="seo">SEO</th>
+  <th data-page="${id}" data-col="best_practices">Best Practices</th>
+
+  <th data-page="${id}" data-col="ttfb">TTFB</th>
+  <th data-page="${id}" data-col="fcp">FCP</th>
+  <th data-page="${id}" data-col="lcp">LCP</th>
+  <th data-page="${id}" data-col="tbt">TBT</th>
+  <th data-page="${id}" data-col="cls">CLS</th>
+  <th data-page="${id}" data-col="chrome_version">Chromium</th>
+  <th data-page="${id}" data-col="lighthouse_version">Lighthouse</th>
+
+</tr>
+</thead>
 
             <tbody id="tbody-${id}"></tbody>
           </table>
@@ -904,6 +1071,47 @@ card.innerHTML = `
               ${item.best_practices}
             </span>
           </td>
+<td>
+  ${item.ttfb
+    ? Math.round(item.ttfb) + " ms"
+    : "-"}
+</td>
+
+<td>
+  ${item.fcp
+    ? (item.fcp / 1000).toFixed(2) + " s"
+    : "-"}
+</td>
+
+<td>
+  ${item.lcp
+    ? (item.lcp / 1000).toFixed(2) + " s"
+    : "-"}
+</td>
+
+<td>
+  ${item.tbt
+    ? Math.round(item.tbt) + " ms"
+    : "-"}
+</td>
+
+<td>
+  ${item.cls != null
+    ? Number(item.cls).toFixed(3)
+    : "-"}
+</td>
+
+<td>
+  ${item.chrome_version
+  ? item.chrome_version
+      .replace("Chromium ", "")
+      .replace("Google Chrome ", "")
+  : "-"}
+</td>
+
+<td>
+  ${item.lighthouse_version || "-"}
+</td>
         `;
 
         tableBody.appendChild(row);
